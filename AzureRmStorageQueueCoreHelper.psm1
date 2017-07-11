@@ -24,11 +24,11 @@ function Get-AzureRmStorageQueueQueue
 	.DESCRIPTION
 		Gets a Queue object, it can be from Azure Storage Queue.
 	.PARAMETER resourceGroup
-        Resource Group where the Azure Storage Account is located
-    .PARAMETER queueName
-        Name of the queue to retrieve
-    .PARAMETER storageAccountName
-        Storage Account name where the queue lives
+		Resource Group where the Azure Storage Account is located
+	.PARAMETER queueName
+		Name of the queue to retrieve
+	.PARAMETER storageAccountName
+		Storage Account name where the queue lives
 	.EXAMPLE
 		# Getting storage table object
 		$resourceGroup = "myResourceGroup"
@@ -43,14 +43,14 @@ function Get-AzureRmStorageQueueQueue
 		[string]$resourceGroup,
 		
 		[Parameter(Mandatory=$true)]
-        [String]$queueName,
+		[String]$queueName,
 
 		[Parameter(ParameterSetName="AzureRmQueueStorage",Mandatory=$true)]
 		[Parameter(ParameterSetName="AzureQueueStorage",Mandatory=$true)]
-        [String]$storageAccountName
+		[String]$storageAccountName
 	)
 
-    $nullQueueErrorMessage = [string]::Empty
+	$nullQueueErrorMessage = [string]::Empty
 
     switch ($PSCmdlet.ParameterSetName)
     {
@@ -58,7 +58,7 @@ function Get-AzureRmStorageQueueQueue
             {
 				$saContext = (Get-AzureRmStorageAccount -ResourceGroupName $resourceGroup -Name $storageAccountName).Context	
 
-                [Microsoft.WindowsAzure.Commands.Common.Storage.ResourceModel.AzureStorageQueue]$queue = Get-AzureStorageQueue -Name $queueName -Context $saContext -ErrorAction SilentlyContinue
+				[Microsoft.WindowsAzure.Commands.Common.Storage.ResourceModel.AzureStorageQueue]$queue = Get-AzureStorageQueue -Name $queueName -Context $saContext -ErrorAction SilentlyContinue
 
 				if ($queue -eq $null)
 				{
@@ -302,17 +302,15 @@ function Update-AzureRmStorageQueueMessage
 {
 	<#
 	.SYNOPSIS
-		Deletes a message from the queue.
+		Updates a message in the queue.
 	.DESCRIPTION
-		Deletes a message from the queue.
+		Updates a message in the queue.
     .PARAMETER queue
-        Name of the queue to delete the message.
+        Name of the queue where the message to be updated exists.
 	.PARAMETER message
-		CloudQueueMessage message to delete.
-	.PARAMETER messageId
-		Message ID of the message to delete.
-	.PARAMETER popReceipt
-		popReceipt value of the message to delete.
+		CloudQueueMessage message to be updated.
+	.PARAMETER visibilityTimeout
+		Visibility timeout of the message, if $null, it will default to immidiate timeout.
 	.EXAMPLE
 
 	#>
@@ -321,29 +319,20 @@ function Update-AzureRmStorageQueueMessage
 		[Parameter(Mandatory=$true)]
         [Microsoft.WindowsAzure.Commands.Common.Storage.ResourceModel.AzureStorageQueue]$queue,
 
-		[Parameter(ParameterSetName="BasedOnCloudQueueMessage",Mandatory=$true)]
 		[ValidateNotNull()]
 		[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage]$message,
 
-		[Parameter(ParameterSetName="BasedOnMessageID",Mandatory=$true)]
-		[ValidateNotNull()]
-		[string]$messageId,
+		[Parameter(ParameterSetName="VisibilityUpdate",Mandatory=$false)]
+		[System.Timespan]$visibilityTimeout
 
-		[Parameter(ParameterSetName="BasedOnMessageID",Mandatory=$true)]
-		[ValidateNotNull()]
-		[string]$popReceipt
 	)
-    
-	switch ($PSCmdlet.ParameterSetName)
-    {
-        "BasedOnCloudQueueMessage"
-		{
-			$queue.CloudQueue.DeleteMessage($message)
-		}
-
-		"BasedOnMessageID"
-		{
-			$queue.CloudQueue.DeleteMessage($messageId,$popReceipt)
-		}
+	
+	if ($PSCmdlet.ParameterSetName -eq "VisibilityUpdate" )
+	{
+		$queue.CloudQueue.UpdateMessage($message,$visibilityTimeout,([Microsoft.WindowsAzure.Storage.Queue.MessageUpdateFields]::Visibility))
+	}
+	else
+	{
+		$queue.CloudQueue.UpdateMessage($message,(New-Timespan $(get-date) $message.NextVisibleTime.Date),([Microsoft.WindowsAzure.Storage.Queue.MessageUpdateFields]::Content -bor [Microsoft.WindowsAzure.Storage.Queue.MessageUpdateFields]::Visibility))
 	}
 }
