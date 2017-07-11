@@ -33,17 +33,14 @@ CLRVersion = '2.0'
 # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
 NestedModules = @('AzureRmStorageQueueCoreHelper.psm1')
 
-#FunctionsToExport = @(  'Add-StorageTableRow',
-                        # 'Get-AzureStorageTableRowAll',
-                        # 'Get-AzureStorageTableRowByPartitionKey',
-                        # 'Get-AzureStorageTableRowByColumnName',
-                        # 'Get-AzureStorageTableRowByCustomFilter',
-                        # 'Update-AzureStorageTableRow',
-                        # 'Remove-AzureStorageTableRow',
-                        # 'Get-AzureStorageTableTable'
-                        # )
-
-FunctionsToExport = '*'
+FunctionsToExport = @( 'Add-AzureRmStorageQueueMessage',
+                        'Clear-AzureRmStorageQueue',
+                        'Get-AzureRmStorageQueueQueue',
+                        'Invoke-AzureRmStorageQueueGetMessage',
+                        'Invoke-AzureRmStorageQueuePeekMessage',
+                        'Invoke-AzureRmStorageQueuePeekMessageList',
+                        'Remove-AzureRmStorageQueueMessage',
+                        'Update-AzureRmStorageQueueMessage')
 
 VariablesToExport = ''
 
