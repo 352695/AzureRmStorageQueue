@@ -20,9 +20,9 @@ function Get-AzureRmStorageQueueQueue
 {
 	<#
 	.SYNOPSIS
-		Gets a Queue object, it can be from Azure Storage Queue.
+		Creates/Gets a queue object/resource.
 	.DESCRIPTION
-		Gets a Queue object, it can be from Azure Storage Queue.
+		Creates/Gets a queue object/resource.
 	.PARAMETER resourceGroup
 		Resource Group where the Azure Storage Account is located
 	.PARAMETER queueName
