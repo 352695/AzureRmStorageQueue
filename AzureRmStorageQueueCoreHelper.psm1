@@ -165,7 +165,9 @@ function Add-AzureRmStorageQueueMessage
 	.DESCRIPTION
 		Adds a message into the queue.
     .PARAMETER queue
-        Name of the queue to add the message.
+		Name of the queue to add the message.
+    .PARAMETER message
+        Content that will be added to the queue, can be string or hashtable (this gets converted to JSON string).
 	.EXAMPLE
 		Add-AzureRmStorageQueueMessage -queue $queue -message @{"type"="copy";"vhdname"="newvhd.vhd";"sourceStorageAccount"="pmcstorage05";"subscription"="pmcglobal"}
 	#>
