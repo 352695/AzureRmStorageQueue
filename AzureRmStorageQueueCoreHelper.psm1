@@ -175,12 +175,23 @@ function Add-AzureRmStorageQueueMessage
 		[Parameter(Mandatory=$true)]
         [Microsoft.WindowsAzure.Commands.Common.Storage.ResourceModel.AzureStorageQueue]$queue,
 
-		[Parameter(Mandatory=$true)]
+		[Parameter(Mandatory=$true, ParameterSetName="hashtableMessageType")]
 		[ValidateNotNullOrEmpty()]
-		[Hashtable]$message
+		[Hashtable]$message,
+
+		[Parameter(Mandatory=$true, ParameterSetName="stringMessageType")]
+		[ValidateNotNullOrEmpty()]
+		[string]$message,
 	)
 
-	$messageToQueue = New-Object -TypeName Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage($message | ConvertTo-Json -Depth 100)
+	if ($PSCmdlet.ParameterSetName -eq "hashtableMessageType")
+	{
+		$messageToQueue = New-Object -TypeName Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage($message | ConvertTo-Json -Depth 100)
+	}
+	else
+	{
+		$messageToQueue = New-Object -TypeName Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage($message)
+	}
 
 	$queue.CloudQueue.AddMessage($messageToQueue)
 }
