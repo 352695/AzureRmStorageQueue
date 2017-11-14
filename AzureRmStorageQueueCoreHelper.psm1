@@ -167,7 +167,7 @@ function Add-AzureRmStorageQueueMessage
     .PARAMETER queue
 		Name of the queue to add the message.
     .PARAMETER message
-        Content that will be added to the queue, can be string or hashtable (this gets converted to JSON string).
+		Content that will be added to the queue. If the message is type hashtable, that is converted to a json string.
 	.EXAMPLE
 		Add-AzureRmStorageQueueMessage -queue $queue -message @{"type"="copy";"vhdname"="newvhd.vhd";"sourceStorageAccount"="pmcstorage05";"subscription"="pmcglobal"}
 	#>
@@ -177,16 +177,13 @@ function Add-AzureRmStorageQueueMessage
 		[Parameter(Mandatory=$true)]
         [Microsoft.WindowsAzure.Commands.Common.Storage.ResourceModel.AzureStorageQueue]$queue,
 
-		[Parameter(Mandatory=$true, ParameterSetName="hashtableMessageType")]
+		[Parameter(Mandatory=$true)]
 		[ValidateNotNullOrEmpty()]
-		[Hashtable]$message,
+		$message
 
-		[Parameter(Mandatory=$true, ParameterSetName="stringMessageType")]
-		[ValidateNotNullOrEmpty()]
-		[string]$message,
 	)
 
-	if ($PSCmdlet.ParameterSetName -eq "hashtableMessageType")
+	if ($message.gettype().Name -eq "hashtable")
 	{
 		$messageToQueue = New-Object -TypeName Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage($message | ConvertTo-Json -Depth 100)
 	}

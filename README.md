@@ -6,4 +6,4 @@ For detailed information on how to work with this PowerShell module, please refe
 ## Changelog
 
 ### 11/13/2017
-* Add-AzureRmStorageQueueMessage cmdlet now accepts string as message type
+* Add-AzureRmStorageQueueMessage cmdlet now accepts string as message type on top of hashtables
