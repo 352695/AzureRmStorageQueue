@@ -15,6 +15,33 @@
 #Requires -Modules AzureRM.Profile, AzureRM.Storage, AzureRM.Resources, Azure.Storage
 
 # Module Functions
+function GetLatestFullAssemblyName
+{
+	param
+	(
+		[string]$dllName
+	)
+
+	# getting list of all assemblies
+	$assemblies = [appdomain]::currentdomain.getassemblies() | Where-Object {$_.location -like "*$dllName"}
+	
+	if ($assemblies -eq $null)
+	{
+		throw "Could not identify any assembly related to DLL named $dllName"
+	}
+
+	$sanitazedAssemblyList = @()
+	foreach ($assembly in $assemblies)
+	{
+		[version]$version = $assembly.fullname.split(",")[1].split("=")[1]
+		$sanitazedAssemblyList += New-Object -TypeName psobject -Property @{"version"=$version;"fullName"=$assembly.fullname;"location"=$assembly.location}
+	}
+
+	return ($sanitazedAssemblyList | Sort-Object version -Descending)[0]
+}
+
+# Getting latest Microsoft.WindowsAzure.Storage.dll full Assembly name 
+$assemblySN = (GetLatestFullAssemblyName -dllName Microsoft.WindowsAzure.Storage.dll).fullname
 
 function Get-AzureRmStorageQueueQueue
 {
@@ -113,7 +140,10 @@ function Invoke-AzureRmStorageQueuePeekMessage
         [Microsoft.WindowsAzure.Commands.Common.Storage.ResourceModel.AzureStorageQueue]$queue
 	)
 
-	[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage]$message = $queue.CloudQueue.PeekMessage()
+	#[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage]$message = $queue.CloudQueue.PeekMessage()
+	(invoke-expression "[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage,$assemblySN]`$message = `$queue.CloudQueue.PeekMessage()")
+
+	#$message = New-Object -TypeName "Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage,$assemblySN"($queue.CloudQueue.PeekMessage())
 
 	if ($message -ne $null)
 	{
@@ -185,11 +215,11 @@ function Add-AzureRmStorageQueueMessage
 
 	if ($message.gettype().Name -eq "hashtable")
 	{
-		$messageToQueue = New-Object -TypeName Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage($message | ConvertTo-Json -Depth 100)
+		$messageToQueue = New-Object -TypeName "Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage,$assemblySN"($message | ConvertTo-Json -Depth 100)
 	}
 	else
 	{
-		$messageToQueue = New-Object -TypeName Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage($message)
+		$messageToQueue = New-Object -TypeName "Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage,$assemblySN"($message)
 	}
 
 	$queue.CloudQueue.AddMessage($messageToQueue)
@@ -242,7 +272,11 @@ function Invoke-AzureRmStorageQueueGetMessage
 		[System.Timespan]$visibilityTimeout = (New-TimeSpan $(get-date) $(get-date).AddDays(1))
 	)
 
-	[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage]$message = $queue.CloudQueue.GetMessage($visibilityTimeout)
+	#[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage]$message = $queue.CloudQueue.GetMessage($visibilityTimeout)
+	
+	(invoke-expression "[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage,$assemblySN]`$message = `$queue.CloudQueue.GetMessage(`$visibilityTimeout)")
+
+	#$message = New-Object -TypeName "Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage,$assemblySN"($queue.CloudQueue.GetMessage($visibilityTimeout))
 
 	if ($message -ne $null)
 	{
@@ -283,7 +317,7 @@ function Remove-AzureRmStorageQueueMessage
 
 		[Parameter(ParameterSetName="BasedOnCloudQueueMessage",Mandatory=$true)]
 		[ValidateNotNull()]
-		[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage]$message,
+		$message,
 
 		[Parameter(ParameterSetName="BasedOnMessageID",Mandatory=$true)]
 		[ValidateNotNull()]
@@ -330,7 +364,7 @@ function Update-AzureRmStorageQueueMessage
         [Microsoft.WindowsAzure.Commands.Common.Storage.ResourceModel.AzureStorageQueue]$queue,
 
 		[ValidateNotNull()]
-		[Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage]$message,
+		$message,
 
 		[Parameter(ParameterSetName="VisibilityUpdate",Mandatory=$false)]
 		[System.Timespan]$visibilityTimeout
