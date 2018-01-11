@@ -198,6 +198,8 @@ function Add-AzureRmStorageQueueMessage
 		Name of the queue to add the message.
     .PARAMETER message
 		Content that will be added to the queue. If the message is type hashtable, that is converted to a json string.
+    .PARAMETER expirationTimeSpan
+		Optional time span used to set the expiration of the message
 	.EXAMPLE
 		Add-AzureRmStorageQueueMessage -queue $queue -message @{"type"="copy";"vhdname"="newvhd.vhd";"sourceStorageAccount"="pmcstorage05";"subscription"="pmcglobal"}
 	#>
@@ -209,8 +211,10 @@ function Add-AzureRmStorageQueueMessage
 
 		[Parameter(Mandatory=$true)]
 		[ValidateNotNullOrEmpty()]
-		$message
-
+		$message,
+		
+		[Parameter(Mandatory=$false)]
+		[TimeSpan] $expirationTimeSpan
 	)
 
 	if ($message.gettype().Name -eq "hashtable")
@@ -222,7 +226,14 @@ function Add-AzureRmStorageQueueMessage
 		$messageToQueue = New-Object -TypeName "Microsoft.WindowsAzure.Storage.Queue.CloudQueueMessage,$assemblySN"($message)
 	}
 
-	$queue.CloudQueue.AddMessage($messageToQueue)
+	if($expirationTimeSpan -ne $null)
+	{
+		$queue.CloudQueue.AddMessage($messageToQueue, $expirationTimeSpan)
+	}
+	else
+	{
+		$queue.CloudQueue.AddMessage($messageToQueue)
+	}
 }
 
 function Clear-AzureRmStorageQueue

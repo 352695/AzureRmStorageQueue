@@ -19,7 +19,7 @@ Description = 'Sample functions to work with Azure Storage Queues from PowerShel
 HelpInfoUri = ''
 
 # Version number of this module
-ModuleVersion = '1.0.0.3'
+ModuleVersion = '1.0.0.4'
 
 # Minimum version of the Windows PowerShell engine required by this module
 PowerShellVersion = '4.0'

@@ -5,6 +5,9 @@ For detailed information on how to work with this PowerShell module, please refe
 
 ## Changelog
 
+### 01/10/2018
+* Contribution from John O'Sullivan that implements a custom expiration time for the queued message
+
 ### 12/05/2017
 * Implemented some measures in order to avoid conflicts between different assembly versions, more specifically Microsoft.WindowsAzure.Storage.Dll.
 
